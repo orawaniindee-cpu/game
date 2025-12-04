@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappy Bird Clone</title>
+    <style>
+        /* --- ส่วน CSS (อ้างอิงจากในภาพ + ปรับปรุงให้เล่นได้) --- */
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .background {
+            height: 100vh;
+            width: 100vw;
+            background-color: skyblue; /* ใส่สีแทนรูปภาพเพื่อให้เห็นผลทันที */
+            /* ถ้ามีรูปภาพ ให้ใช้บรรทัดล่างนี้แทนครับ */
+            /* background: url('images/background-img.png') no-repeat center center fixed; */
+            background-size: cover;
+            overflow: hidden; /* ป้องกันไม่ให้หน้าจอเลื่อน */
+            position: relative;
+        }
+
+        .bird {
+            height: 50px; /* ปรับขนาดให้สมจริงขึ้น (ในภาพ 100px ใหญ่มาก) */
+            width: 60px;
+            background-color: yellow; /* สีแทนตัวนก */
+            border: 2px solid black;
+            border-radius: 50%;
+            position: fixed;
+            top: 40vh;
+            left: 30vw;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ตกแต่งตานกกับปากนกเพื่อให้ดูเหมือนในคลิป */
+        .bird::after {
+            content: "";
+            width: 15px;
+            height: 15px;
+            background: white;
+            border-radius: 50%;
+            border: 2px solid black;
+            position: absolute;
+            top: 5px;
+            right: 10px;
+        }
+        .bird::before {
+            content: "";
+            width: 20px;
+            height: 10px;
+            background: orange;
+            position: absolute;
+            top: 25px;
+            right: -5px;
+            border: 1px solid black;
+        }
+
+        .message {
+            position: absolute;
+            z-index: 10;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            font-size: 2rem;
+            color: black;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            display: block; /* เริ่มต้นแสดงข้อความ */
+        }
+
+        .score_val {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            font-size: 2rem;
+            color: white;
+            z-index: 100;
+            font-weight: bold;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        /* ท่อ (Pipes) */
+        .pipe_sprite {
+            position: fixed;
+            top: 0; /* จะถูกกำหนดค่าใหม่ด้วย JS */
+            width: 6vw; /* ตามภาพ */
+            background: radial-gradient(lightgreen 50%, green); /* ตามภาพ */
+            border: 3px solid black; /* ตามภาพ */
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="background">
+        <div class="score_val">Score: 0</div>
+        <div class="message">
+            Press Enter <br> to Start Game
+        </div>
+        <div class="bird"></div>
+        </div>
+
+    <script>
+        // --- ส่วน JavaScript (Logic ของเกม) ---
+        
+        // ตัวแปรตั้งค่าเกม
+        let move_speed = 3;
+        let gravity = 0.5;
+        let bird = document.querySelector('.bird');
+        let img = document.getElementById('bird-1');
+        let sound_point = new Audio('sounds effect/point.mp3'); // (ถ้ามีไฟล์เสียง)
+        let sound_die = new Audio('sounds effect/die.mp3'); // (ถ้ามีไฟล์เสียง)
+
+        // สถานะเกม
+        let bird_props = bird.getBoundingClientRect();
+        let background = document.querySelector('.background').getBoundingClientRect();
+        let score_val = document.querySelector('.score_val');
+        let message = document.querySelector('.message');
+        let score_title = document.querySelector('.score_title');
+
+        let game_state = 'Start';
+        img_dy = 0; // ความเร็วแนวดิ่งเริ่มต้น
+        
+        document.addEventListener('keydown', (e) => {
+            if(e.key == 'Enter' && game_state != 'Play'){
+                document.querySelectorAll('.pipe_sprite').forEach((e) => {
+                    e.remove();
+                });
+                img_dy = 0;
+                bird.style.top = '40vh';
+                game_state = 'Play';
+                message.style.display = 'none';
+                score_val.innerHTML = 'Score: 0';
+                play();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if(e.key == ' ' || e.key == 'ArrowUp'){
+                img_dy = -7.6; // แรงกระโดด
+            }
+        });
+
+        // ฟังก์ชันหลักในการรันเกม
+        function play(){
+            function move(){
+                if(game_state != 'Play') return;
+
+                // สร้างท่อแบบสุ่ม
+                let pipe_sprite = document.querySelectorAll('.pipe_sprite');
+                
+                // ถ้าไม่มีท่อ หรือท่อสุดท้ายเลื่อนไปไกลแล้ว ให้สร้างใหม่
+                if(pipe_sprite.length == 0 || pipe_sprite[pipe_sprite.length - 1].getBoundingClientRect().right < window.innerWidth - 300){ // ระยะห่างระหว่างท่อ
+                    
+                    let pipe_element = document.createElement('div');
+                    pipe_element.className = 'pipe_sprite';
+                    
+                    // สุ่มความสูงท่อ (บน)
+                    let pipe_height = Math.floor(Math.random() * 40) + 10; // สุ่ม 10-50vh
+                    pipe_element.style.height = pipe_height + 'vh';
+                    pipe_element.style.left = '100vw';
+                    pipe_element.style.top = '0'; // ท่อบนติดเพดาน
+                    
+                    document.body.appendChild(pipe_element);
+
+                    // สร้างท่อล่าง (คู่กัน)
+                    let pipe_bottom = document.createElement('div');
+                    pipe_bottom.className = 'pipe_sprite';
+                    pipe_bottom.style.height = (100 - pipe_height - 25) + 'vh'; // เว้นช่องว่าง 25vh
+                    pipe_bottom.style.left = '100vw';
+                    pipe_bottom.style.bottom = '0'; // ท่อล่างติดพื้น
+                    // แก้ไข css top ที่ติดมากับ class
+                    pipe_bottom.style.top = 'auto'; 
+                    
+                    document.body.appendChild(pipe_bottom);
+                }
+
+                // ขยับท่อและตรวจสอบการชน
+                pipe_sprite.forEach((element) => {
+                    let pipe_sprite_props = element.getBoundingClientRect();
+                    bird_props = bird.getBoundingClientRect();
+
+                    // ลบท่อที่หลุดจอ
+                    if(pipe_sprite_props.right <= 0){
+                        element.remove();
+                    }else{
+                        // เช็คการชน (Bird ชน Pipe)
+                        if(bird_props.left < pipe_sprite_props.left + pipe_sprite_props.width && 
+                           bird_props.left + bird_props.width > pipe_sprite_props.left && 
+                           bird_props.top < pipe_sprite_props.top + pipe_sprite_props.height && 
+                           bird_props.top + bird_props.height > pipe_sprite_props.top){
+                            
+                            game_state = 'End';
+                            message.innerHTML = 'Game Over'.fontcolor('red') + '<br>Press Enter to Restart';
+                            message.style.display = 'block';
+                            return;
+                        }else{
+                            // ขยับท่อมาทางซ้าย
+                            if(pipe_sprite_props.right < bird_props.left && pipe_sprite_props.right + move_speed >= bird_props.left && element.increase_score == '1'){
+                                score_val.innerHTML = 'Score: ' + (parseInt(score_val.innerHTML.split(':')[1]) + 1);
+                            }
+                            element.style.left = pipe_sprite_props.left - move_speed + 'px';
+                        }
+                    }
+                });
+
+                requestAnimationFrame(move);
+            }
+            requestAnimationFrame(move);
+
+            // ฟังก์ชันแรงโน้มถ่วงและการขยับของนก
+            function apply_gravity(){
+                if(game_state != 'Play') return;
+                img_dy = img_dy + gravity;
+                
+                // ตรวจสอบการชนพื้นหรือเพดาน
+                if(bird_props.top <= 0 || bird_props.bottom >= background.bottom){
+                    game_state = 'End';
+                    message.innerHTML = 'Game Over'.fontcolor('red') + '<br>Press Enter to Restart';
+                    message.style.display = 'block';
+                    return;
+                }
+                
+                bird.style.top = (bird_props.top + img_dy) + 'px';
+                bird_props = bird.getBoundingClientRect();
+                requestAnimationFrame(apply_gravity);
+            }
+            requestAnimationFrame(apply_gravity);
+        }
+    </script>
+</body>
+</html>
