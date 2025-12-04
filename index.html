@@ -24,7 +24,7 @@
         }
 
         .bird {
-            height: 40px; /* ลดขนาดนกลงอีก */
+            height: 50px; /* ลดขนาดนกลงอีก */
             width: 50px;
             background-color: rgb(238, 143, 198);
             border: 2px solid black;
@@ -112,9 +112,9 @@
 
     <script>
         // --- ปรับค่าความง่ายแบบสุดๆ ตรงนี้ ---
-        let move_speed = 1.3;   // ช้าเป็นเต่าคลาน (สโลว์โมชั่น)
+        let move_speed = 2.5;   // ช้าเป็นเต่าคลาน (สโลว์โมชั่น)
         let gravity = 0.15;     // แรงโน้มถ่วงดวงจันทร์ (ตกช้ามาก)
-        let gap_size = 55;      // ช่องว่าง 55vh (เกินครึ่งจอ)
+        let gap_size = 35;      // ช่องว่าง 55vh (เกินครึ่งจอ)
         let jump_force = -4;    // แรงกระโดดเบาๆ ให้คุมง่าย
         
         let bird = document.querySelector('.bird');
@@ -178,7 +178,7 @@
                     let pipe_element = document.createElement('div');
                     pipe_element.className = 'pipe_sprite';
                     // สุ่มท่อบนให้สั้นลงอีก เพื่อเปิดช่องให้กว้าง
-                    let pipe_height = Math.floor(Math.random() * 20) + 5; 
+                    let pipe_height = Math.floor(Math.random() * 40) + 5; 
                     pipe_element.style.height = pipe_height + 'vh';
                     pipe_element.style.left = '100vw';
                     pipe_element.style.top = '0';
