@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Flappy Bird (Easy version)</title>
+    <title>Flappy Bird (Super Easy)</title>
     <style>
         * {
             padding: 0;
@@ -24,9 +24,9 @@
         }
 
         .bird {
-            height: 45px; /* ลดขนาดนกลงอีก */
+            height: 40px; /* ลดขนาดนกลงอีก */
             width: 50px;
-            background-color: rgb(231, 107, 76);
+            background-color: yellow;
             border: 2px solid black;
             border-radius: 50%;
             position: fixed;
@@ -54,7 +54,7 @@
             content: "";
             width: 15px;
             height: 8px;
-            background: rgb(233, 62, 62);
+            background: orange;
             position: absolute;
             top: 20px;
             right: -4px;
@@ -105,7 +105,7 @@
     <div class="background">
         <div class="score_val">Score: 0</div>
         <div class="message">
-            Tap Screen <br> (Easy version)
+            Tap Screen <br> (Super Easy)
         </div>
         <div class="bird"></div>
     </div>
@@ -114,8 +114,8 @@
         // --- ปรับค่าความง่ายแบบสุดๆ ตรงนี้ ---
         let move_speed = 1.5;   // ช้าเป็นเต่าคลาน (สโลว์โมชั่น)
         let gravity = 0.15;     // แรงโน้มถ่วงดวงจันทร์ (ตกช้ามาก)
-        let gap_size = 35;      // ช่องว่าง 55vh (เกินครึ่งจอ)
-        let jump_force = -5;    // แรงกระโดดเบาๆ ให้คุมง่าย
+        let gap_size = 45;      // ช่องว่าง 55vh (เกินครึ่งจอ)
+        let jump_force = -4;    // แรงกระโดดเบาๆ ให้คุมง่าย
         
         let bird = document.querySelector('.bird');
         let bird_props = bird.getBoundingClientRect();
@@ -178,7 +178,7 @@
                     let pipe_element = document.createElement('div');
                     pipe_element.className = 'pipe_sprite';
                     // สุ่มท่อบนให้สั้นลงอีก เพื่อเปิดช่องให้กว้าง
-                    let pipe_height = Math.floor(Math.random() * 50) + 5; 
+                    let pipe_height = Math.floor(Math.random() * 20) + 5; 
                     pipe_element.style.height = pipe_height + 'vh';
                     pipe_element.style.left = '100vw';
                     pipe_element.style.top = '0';
