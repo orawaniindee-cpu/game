@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Flappy Bird for iPad</title>
+    <title>Flappy Bird (Easy Mode)</title>
     <style>
         * {
             padding: 0;
             margin: 0;
             box-sizing: border-box;
             font-family: Arial, Helvetica, sans-serif;
-            /* ป้องกันการเลือก text เวลาแตะรัวๆ บน iPad */
             -webkit-user-select: none;
             user-select: none;
         }
@@ -27,17 +26,17 @@
         .bird {
             height: 50px;
             width: 60px;
-            background-color: yellow;
+            background-color: rgb(241, 157, 213);
             border: 2px solid black;
             border-radius: 50%;
             position: fixed;
             top: 40vh;
-            left: 30vw; /* ขยับมากลางๆ หน่อยสำหรับจอมือถือ/iPad */
+            left: 30vw;
             z-index: 100;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.1s; /* เพิ่ม animation เวลาบิน */
+            transition: transform 0.1s;
         }
 
         .bird::after {
@@ -55,7 +54,7 @@
             content: "";
             width: 20px;
             height: 10px;
-            background: orange;
+            background: rgb(165, 110, 216);
             position: absolute;
             top: 25px;
             right: -5px;
@@ -80,7 +79,7 @@
 
         .score_val {
             position: fixed;
-            top: 40px; /* ขยับลงมาหน่อยเผื่อติดขอบจอ iPad */
+            top: 40px;
             left: 20px;
             font-size: 2rem;
             color: white;
@@ -92,7 +91,7 @@
         .pipe_sprite {
             position: fixed;
             top: 0;
-            width: 15vw; /* ปรับท่อให้กว้างขึ้นหน่อยสำหรับจอสัมผัส */
+            width: 15vw;
             max-width: 80px;
             background: radial-gradient(lightgreen 50%, green);
             border: 3px solid black;
@@ -105,17 +104,18 @@
     <div class="background">
         <div class="score_val">Score: 0</div>
         <div class="message">
-            Tap Screen <br> to Start Game
+            Tap Screen <br> (Easy Mode)
         </div>
         <div class="bird"></div>
     </div>
 
     <script>
-        // --- Game Variables ---
-        let move_speed = 3; 
-        let gravity = 0.5;
-        let bird = document.querySelector('.bird');
+        // --- Game Variables (ปรับให้ง่ายที่นี่) ---
+        let move_speed = 2;   // ลดความเร็วจาก 3 เหลือ 2
+        let gravity = 0.3;    // ลดแรงดึงดูดจาก 0.5 เหลือ 0.3 (ตกช้าลง)
+        let gap_size = 35;    // เพิ่มช่องว่างระหว่างท่อ (35vh) กว้างมาก!
         
+        let bird = document.querySelector('.bird');
         let bird_props = bird.getBoundingClientRect();
         let background = document.querySelector('.background').getBoundingClientRect();
         let score_val = document.querySelector('.score_val');
@@ -123,9 +123,6 @@
         
         let game_state = 'Start';
         let img_dy = 0;
-        let is_jumping = false;
-
-        // --- Controller Functions (รวม Logic ไว้ที่เดียว) ---
 
         function startGame() {
             if(game_state != 'Play'){
@@ -143,8 +140,7 @@
 
         function jump() {
             if(game_state === 'Play'){
-                img_dy = -3; // แรงกระโดด
-                // เอียงตัวนกขึ้นเล็กน้อยเวลาโดด (Effect)
+                img_dy = -6; // ปรับแรงโดดให้เข้ากับแรงโน้มถ่วงใหม่
                 bird.style.transform = 'rotate(-20deg)';
                 setTimeout(() => {
                     bird.style.transform = 'rotate(0deg)';
@@ -152,37 +148,21 @@
             }
         }
 
-        // --- Event Listeners (รองรับทั้ง PC และ iPad) ---
-
-        // 1. รองรับการแตะหน้าจอ (Touch)
+        // --- Event Listeners ---
         document.addEventListener('touchstart', (e) => {
-            // e.preventDefault(); // ป้องกันการซูมหรือเลื่อนหน้าจอโดยไม่ตั้งใจ
-            if(game_state != 'Play') {
-                startGame();
-            } else {
-                jump();
-            }
+            if(game_state != 'Play') startGame();
+            else jump();
         });
 
-        // 2. รองรับคีย์บอร์ด (PC)
         document.addEventListener('keydown', (e) => {
-            if(e.key == 'Enter' && game_state != 'Play'){
-                startGame();
-            }
-            if((e.key == ' ' || e.key == 'ArrowUp') && game_state == 'Play'){
-                jump();
-            }
+            if(e.key == 'Enter' && game_state != 'Play') startGame();
+            if((e.key == ' ' || e.key == 'ArrowUp') && game_state == 'Play') jump();
         });
 
-        // 3. รองรับการคลิกเมาส์ (PC Mouse Click)
         document.addEventListener('mousedown', (e) => {
-             if(game_state != 'Play') {
-                startGame();
-            } else {
-                jump();
-            }
+             if(game_state != 'Play') startGame();
+             else jump();
         });
-
 
         // --- Main Game Loop ---
         function play(){
@@ -196,7 +176,8 @@
                     
                     let pipe_element = document.createElement('div');
                     pipe_element.className = 'pipe_sprite';
-                    let pipe_height = Math.floor(Math.random() * 40) + 10;
+                    // สุ่มความสูงท่อบน (ลดความสูงลงเพื่อให้ช่องกว้างขึ้น)
+                    let pipe_height = Math.floor(Math.random() * 30) + 10; 
                     pipe_element.style.height = pipe_height + 'vh';
                     pipe_element.style.left = '100vw';
                     pipe_element.style.top = '0';
@@ -204,7 +185,8 @@
 
                     let pipe_bottom = document.createElement('div');
                     pipe_bottom.className = 'pipe_sprite';
-                    pipe_bottom.style.height = (100 - pipe_height - 25) + 'vh'; // ช่องว่าง 25vh
+                    // คำนวณความสูงท่อล่าง โดยอิงจาก gap_size ที่กว้างขึ้น
+                    pipe_bottom.style.height = (100 - pipe_height - gap_size) + 'vh'; 
                     pipe_bottom.style.left = '100vw';
                     pipe_bottom.style.bottom = '0';
                     pipe_bottom.style.top = 'auto'; 
@@ -227,7 +209,6 @@
                             gameOver();
                             return;
                         }else{
-                            // นับคะแนน
                             if(pipe_sprite_props.right < bird_props.left && pipe_sprite_props.right + move_speed >= bird_props.left && element.style.top === '0px'){
                                 score_val.innerHTML = 'Score: ' + (parseInt(score_val.innerHTML.split(':')[1]) + 1);
                             }
@@ -243,7 +224,6 @@
                 if(game_state != 'Play') return;
                 img_dy = img_dy + gravity;
                 
-                // ชนขอบบนหรือล่าง
                 if(bird_props.top <= 0 || bird_props.bottom >= background.bottom){
                     gameOver();
                     return;
