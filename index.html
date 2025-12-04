@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Flappy Bird (Easy Mode)</title>
+    <title>Flappy Bird (Super Easy)</title>
     <style>
         * {
             padding: 0;
@@ -24,9 +24,9 @@
         }
 
         .bird {
-            height: 50px;
-            width: 60px;
-            background-color: rgb(241, 157, 213);
+            height: 40px; /* ลดขนาดนกลงอีก */
+            width: 50px;
+            background-color: rgb(238, 143, 198);
             border: 2px solid black;
             border-radius: 50%;
             position: fixed;
@@ -41,23 +41,23 @@
 
         .bird::after {
             content: "";
-            width: 15px;
-            height: 15px;
+            width: 12px;
+            height: 12px;
             background: white;
             border-radius: 50%;
             border: 2px solid black;
             position: absolute;
             top: 5px;
-            right: 10px;
+            right: 8px;
         }
         .bird::before {
             content: "";
-            width: 20px;
-            height: 10px;
-            background: rgb(165, 110, 216);
+            width: 15px;
+            height: 8px;
+            background: rgb(233, 62, 62);
             position: absolute;
-            top: 25px;
-            right: -5px;
+            top: 20px;
+            right: -4px;
             border: 1px solid black;
         }
 
@@ -75,6 +75,7 @@
             border-radius: 20px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
             cursor: pointer;
+            width: 80%;
         }
 
         .score_val {
@@ -104,16 +105,17 @@
     <div class="background">
         <div class="score_val">Score: 0</div>
         <div class="message">
-            Tap Screen <br> (Easy Mode)
+            Tap Screen <br> (Super Easy)
         </div>
         <div class="bird"></div>
     </div>
 
     <script>
-        // --- Game Variables (ปรับให้ง่ายที่นี่) ---
-        let move_speed = 2;   // ลดความเร็วจาก 3 เหลือ 2
-        let gravity = 0.3;    // ลดแรงดึงดูดจาก 0.5 เหลือ 0.3 (ตกช้าลง)
-        let gap_size = 35;    // เพิ่มช่องว่างระหว่างท่อ (35vh) กว้างมาก!
+        // --- ปรับค่าความง่ายแบบสุดๆ ตรงนี้ ---
+        let move_speed = 1.3;   // ช้าเป็นเต่าคลาน (สโลว์โมชั่น)
+        let gravity = 0.15;     // แรงโน้มถ่วงดวงจันทร์ (ตกช้ามาก)
+        let gap_size = 55;      // ช่องว่าง 55vh (เกินครึ่งจอ)
+        let jump_force = -4;    // แรงกระโดดเบาๆ ให้คุมง่าย
         
         let bird = document.querySelector('.bird');
         let bird_props = bird.getBoundingClientRect();
@@ -140,7 +142,7 @@
 
         function jump() {
             if(game_state === 'Play'){
-                img_dy = -6; // ปรับแรงโดดให้เข้ากับแรงโน้มถ่วงใหม่
+                img_dy = jump_force; 
                 bird.style.transform = 'rotate(-20deg)';
                 setTimeout(() => {
                     bird.style.transform = 'rotate(0deg)';
@@ -171,13 +173,12 @@
 
                 let pipe_sprite = document.querySelectorAll('.pipe_sprite');
                 
-                // สร้างท่อ
                 if(pipe_sprite.length == 0 || pipe_sprite[pipe_sprite.length - 1].getBoundingClientRect().right < window.innerWidth - 300){
                     
                     let pipe_element = document.createElement('div');
                     pipe_element.className = 'pipe_sprite';
-                    // สุ่มความสูงท่อบน (ลดความสูงลงเพื่อให้ช่องกว้างขึ้น)
-                    let pipe_height = Math.floor(Math.random() * 30) + 10; 
+                    // สุ่มท่อบนให้สั้นลงอีก เพื่อเปิดช่องให้กว้าง
+                    let pipe_height = Math.floor(Math.random() * 20) + 5; 
                     pipe_element.style.height = pipe_height + 'vh';
                     pipe_element.style.left = '100vw';
                     pipe_element.style.top = '0';
@@ -185,7 +186,6 @@
 
                     let pipe_bottom = document.createElement('div');
                     pipe_bottom.className = 'pipe_sprite';
-                    // คำนวณความสูงท่อล่าง โดยอิงจาก gap_size ที่กว้างขึ้น
                     pipe_bottom.style.height = (100 - pipe_height - gap_size) + 'vh'; 
                     pipe_bottom.style.left = '100vw';
                     pipe_bottom.style.bottom = '0';
